@@ -1,4 +1,4 @@
-from taskonomy_network import TaskonomyEncoder, TaskonomyDecoder, TaskonomyNetwork, TASKONOMY_PRETRAINED_URLS, TASKS_TO_CHANNELS
+from .taskonomy_network import TaskonomyEncoder, TaskonomyDecoder, TaskonomyNetwork, TASKONOMY_PRETRAINED_URLS, TASKS_TO_CHANNELS
 import multiprocessing.dummy as mp
 import torch
 
