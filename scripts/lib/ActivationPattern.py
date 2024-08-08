@@ -1,9 +1,10 @@
+# type-hinting
+from __future__ import annotations
+
 # python
 from collections import OrderedDict
 from dataclasses import dataclass
 
-# type-hinting
-from __future__ import annotations
 
 
 

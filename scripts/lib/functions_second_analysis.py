@@ -1,11 +1,11 @@
+# type-hinting
+from __future__ import annotations
+from typing import Union
+
 # python
 import os, pickle
 from collections import OrderedDict
 from dataclasses import dataclass
-
-# type-hinting
-from typing import Union
-from __future__ import annotations
 
 # stats
 import torch
@@ -14,7 +14,7 @@ import pandas as pd
 from scipy.stats import pearsonr, spearmanr
 
 # classes
-from ActivationPattern import Activation_Pattern
+from .ActivationPattern import Activation_Pattern
 
 # neural networks
 from .taskonomy_network import TaskonomyDecoder, TaskonomyEncoder

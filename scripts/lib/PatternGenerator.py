@@ -1,8 +1,8 @@
-# python
-from collections import OrderedDict
-
 # type-hinting
 from __future__ import annotations
+
+# python
+from collections import OrderedDict
 
 # stats
 import torch

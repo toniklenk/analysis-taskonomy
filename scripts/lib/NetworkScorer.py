@@ -1,16 +1,16 @@
+# type-hinting
+from __future__ import annotations
+
 # python
 import os, pickle
 from collections import OrderedDict
-
-# type-hinting
-from __future__ import annotations
 
 # stats
 import torch
 import numpy as np
 
 # classes
-from PatternGenerator import Pattern_Generator
+from lib.PatternGenerator import Pattern_Generator
 
 
 
