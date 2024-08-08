@@ -121,7 +121,7 @@ for model = 1:length(MODEL_NAMES)
                 sig=dat.p{st}{dti}{stage}';
                 
                 for xi=1:length(x)
-                    if sig(xi)<0.05/length(x)
+                    if sig(xi)<0.05/length(x) %FDR correction
                         yl=get(gca,'ylim');
                         h=plot(x(xi),yl(2)-0.05-0.025*(stage-1));
                         set(h,'marker','o')
