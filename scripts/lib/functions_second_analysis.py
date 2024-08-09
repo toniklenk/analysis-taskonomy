@@ -1,11 +1,12 @@
 # type-hinting
 from __future__ import annotations
-from typing import Union
+from typing import Union, Dict
 
 # python
 import os, pickle
 from collections import OrderedDict
 from dataclasses import dataclass
+from itertools import combinations_with_replacement
 
 # stats
 import torch
@@ -19,19 +20,6 @@ from .ActivationPattern import Activation_Pattern
 # neural networks
 from .taskonomy_network import TaskonomyDecoder, TaskonomyEncoder
 
-
-
-def calculate_integration_coeff(full: Activation_Pattern, avg: Activation_Pattern):
-    """
-    Calculate integration coeff in every layer from two acivation patterns:
-    - One is the activation to the full image and one the average of the two halfes.
-    - Returns a np.ndarray with shape (layers,) and the correlation coefficients
-
-    """
-    return np.array([
-        -pearsonr(layer_full.flatten(), layer_avg.flatten())[0]
-        for layer_full, layer_avg
-        in zip(full.activation_pattern.values(), avg.activation_pattern.values())])
 
 
 def taskonomy_net_layer_shapes(net: Union[TaskonomyEncoder, TaskonomyDecoder]) -> OrderedDict:
@@ -57,46 +45,57 @@ def taskonomy_activation_layer_shapes(net_activation: OrderedDict) -> OrderedDic
 def correlate_integration_beauty(integration: np.ndarray, beauty_ratings: pd.Series):
     return np.apply_along_axis(lambda c: spearmanr(c, beauty_ratings)[0], 1, integration)
 
-def calculate_dataset_metrics(ImageDataset_iterator, net):
-    """Calculate metrics for whole dataset"""
-
-    def calculate_image_metrics(net, img_full, img_v1, img_v2):
-        """Calculate correlation coefficients for all layers between full and average activation pattern"""
-        """Calculate image self-similarity"""
-        """Calculate imgage L2-norm"""
-
-        # activations for full image and image parts
-        with torch.no_grad():
-            act_full, act_v1, act_v2 = net(img_full), net(img_v1), net(img_v2)
-
-        correlations, selfsimilarity, l2norm = {}, {}, {}
-
-        for (layer, act_full_, act_v1_, act_v2_) in zip(act_full.keys(), act_full.values(), act_v1.values(), act_v2.values()):
-            # average activation for image parts
-            act_avg_ = torch.stack((act_v1_, act_v2_), dim=0).mean(dim=0).flatten()
-            
-            l2norm[layer] = act_full_.norm(p=2).item()
-
-            act_v1_ = act_v1_.flatten()
-            act_v2_ = act_v2_.flatten()
-            act_full_ = act_full_.flatten()
-
-            correlations[layer] = pearsonr(act_full_, act_avg_)[0]
-
-            selfsimilarity[layer] = pearsonr(act_v1_, act_v2_)[0]
 
 
-        return correlations, selfsimilarity, l2norm
-
-
-    lst_correlation, lst_selfsimilarity, lst_l2norm = [],[],[]
-
-    for img_full, img_v1, img_v2 in ImageDataset_iterator:
-        correlation, selfsimilarity, l2norm = calculate_image_metrics(net, img_full, img_v1, img_v2)
-
-        lst_correlation.append(correlation)
-        lst_selfsimilarity.append(selfsimilarity)
-        lst_l2norm.append(l2norm)
+def flatten_concat(d: Dict[str, pd.DataFrame]) -> pd.DataFrame:
+    """ Take a dict of DataFrames, flatten them,
+        concat them into columns a single df and use dict keys as colnames
     
-    column_names = list(net(torch.zeros(1,3,256,256)).keys())
-    return pd.DataFrame(lst_correlation, columns=column_names), pd.DataFrame(lst_selfsimilarity, columns=column_names), pd.DataFrame(lst_l2norm, columns=column_names)
+    """
+
+    d = {key: pd.Series(df.values.flatten()) for key, df in d.items()}
+    df = pd.concat(d.values(), axis=1)
+    df.columns = d.keys()
+    return df
+
+
+def calculate_rdm(data: pd.DataFrame, correlation_type : str = "pearson"):
+    """Calculate RDM with pearson/spearman correlation for every combination of columns
+
+    Parameters
+    ----------
+    data: pd.DataFrame
+        Input with data to correlate in the columns
+
+    correlation_type: str
+        Which correlation to use. "pearson" (default) or "spearman".
+
+        
+    Returns
+    -------
+    pd.DataFrame
+        representational dissimilarity matrix of inputs' columns
+    
+    """
+    num_columns = data.shape[1]
+
+    # create empty matrix to store RDM
+    # index and column labels are in order of input columns
+    rdm = pd.DataFrame(np.full((num_columns, num_columns), np.nan), columns=data.columns, index=data.columns)
+    
+    for col1, col2 in combinations_with_replacement(data.columns, 2):
+        # there's one NaN in the autoencoding integration values, filter this here, don't know why that happens
+        co11_col2 = data[[col1,col2]].dropna()
+        
+        # calculate correlation
+        if correlation_type == "pearson":
+            corr = pearsonr(co11_col2.values[:,0], co11_col2.values[:,1])[0]
+        elif correlation_type == "spearman":
+            corr = spearmanr(co11_col2.values[:,0], co11_col2.values[:,1])[0]
+
+        # fill upper and lower triangular matrix
+        rdm.loc[col1, col2] = corr
+        rdm.loc[col2, col1] = corr
+        rdm.loc[col1, col1] = 0.0
+
+    return rdm

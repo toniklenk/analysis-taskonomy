@@ -8,47 +8,39 @@ from scipy.stats import pearsonr, spearmanr
 
 
 def calculate_image_metrics(net, img_full, img_v1, img_v2):
-    """Calculate correlation coefficients for all layers between full and average activation pattern"""
-    """Calculate image self-similarity"""
-    """Calculate imgage L2-norm"""
-
-    # activations for full image and image parts
+    """ Correlation, self-similarity, L2-norm for one image
+    
+    """
     with torch.no_grad():
         act_full, act_v1, act_v2 = net(img_full), net(img_v1), net(img_v2)
 
     correlations, selfsimilarity, l2norm = {}, {}, {}
-
     for (layer, act_full_, act_v1_, act_v2_) in zip(act_full.keys(), act_full.values(), act_v1.values(), act_v2.values()):
-        # average activation for image parts
         act_avg_ = torch.stack((act_v1_, act_v2_), dim=0).mean(dim=0).flatten()
-        
-        l2norm[layer] = act_full_.norm(p=2).item()
-
         act_v1_ = act_v1_.flatten()
         act_v2_ = act_v2_.flatten()
         act_full_ = act_full_.flatten()
-
+        l2norm[layer] = act_full_.norm(p=2).item()
         correlations[layer] = pearsonr(act_full_, act_avg_)[0]
-
         selfsimilarity[layer] = pearsonr(act_v1_, act_v2_)[0]
-
 
     return correlations, selfsimilarity, l2norm
 
 
-def calculate_dataset_metrics(ImageDataset_iterator, net):
-    """Calculate metrics for whole dataset"""
-    lst_correlation, lst_selfsimilarity, lst_l2norm = [],[],[]
-
-    for img_full, img_v1, img_v2 in ImageDataset_iterator:
-        correlation, selfsimilarity, l2norm = calculate_image_metrics(net, img_full, img_v1, img_v2)
-
-        lst_correlation.append(correlation)
-        lst_selfsimilarity.append(selfsimilarity)
-        lst_l2norm.append(l2norm)
+def calculate_dataset_metrics(images, net):
+    """ Correlation, self-similarity, L2-norm for whole dataset
     
-    column_names = list(net(torch.zeros(1,3,256,256)).keys())
-    return pd.DataFrame(lst_correlation, columns=column_names), pd.DataFrame(lst_selfsimilarity, columns=column_names), pd.DataFrame(lst_l2norm, columns=column_names)
+    """
+    images = iter(images)
+    l_cor, l_ssi, l_l2n = [],[],[]
+    for img_full, img_v1, img_v2 in images:
+        cor, ssi, l2n = calculate_image_metrics(net, img_full, img_v1, img_v2)
+        l_cor.append(cor)
+        l_ssi.append(ssi)
+        l_l2n.append(l2n)
+    
+    cols = list(net(torch.zeros(1,3,256,256)).keys())
+    return pd.DataFrame(l_cor, columns=cols), pd.DataFrame(l_ssi, columns=cols), pd.DataFrame(l_l2n, columns=cols)
 
 
 
