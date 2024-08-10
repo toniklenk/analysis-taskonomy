@@ -10,8 +10,8 @@ MODEL_NAMES = {'autoencoding' 'depth_euclidean' 'jigsaw' 'reshading' ...
 STUDY_NAMES = {'short presentation','long presentation','complexity order','oasis'};
 SCALE_NAMES = {'scale2','scale4','scale8','scale16','scale32'};
 
-RESULTS_PATH = './results taskonomy blocked';
-EXPORT_PATH = '../Taskonomy Integration/analysis results taskonomy blocked_all_layers';
+IMPORT_PATH = './data mat/ibcorr'
+EXPORT_PATH = './data csv/ibcorr'
 
 %%
 load(fullfile(RESULTS_PATH,['cnn_prediction_' MODEL_NAMES{1} '.mat']), "dat")
@@ -24,7 +24,7 @@ for model = 1:length(MODEL_NAMES)
     for study = 1:length(STUDY_NAMES)
         for scale = 1:length(SCALE_NAMES)
             clear dat
-            load(fullfile(RESULTS_PATH,['cnn_prediction_' MODEL_NAMES{model} '.mat']), "dat")
+            load(fullfile(IMPORT_PATH,['cnn_prediction_' MODEL_NAMES{model} '.mat']), "dat")
 
             writematrix(dat.c{study}{1}{scale}, fullfile(EXPORT_PATH, MODEL_NAMES{model}, STUDY_NAMES{study}, SCALE_NAMES{scale}, 'ib_correlations.csv'));
             writematrix(dat.c{study}{2}{scale}, fullfile(EXPORT_PATH, MODEL_NAMES{model}, STUDY_NAMES{study}, SCALE_NAMES{scale}, 'self_similarity.csv'));
@@ -34,11 +34,13 @@ for model = 1:length(MODEL_NAMES)
 end
 
 %% p-values
+
+
 for model = 1:length(MODEL_NAMES)
     for study = 1:length(STUDY_NAMES)
         for scale = 1:length(SCALE_NAMES)
             clear dat
-            load(fullfile(RESULTS_PATH,['cnn_prediction_' MODEL_NAMES{model} '.mat']), "dat")
+            load(fullfile(IMPORT_PATH,['cnn_prediction_' MODEL_NAMES{model} '.mat']), "dat")
 
             writematrix(dat.p{study}{1}{scale}, fullfile(EXPORT_PATH, MODEL_NAMES{model}, STUDY_NAMES{study}, SCALE_NAMES{scale}, 'ib_correlations_pvalues.csv'));
             writematrix(dat.p{study}{2}{scale}, fullfile(EXPORT_PATH, MODEL_NAMES{model}, STUDY_NAMES{study}, SCALE_NAMES{scale}, 'self_similarity_pvalues.csv'));
