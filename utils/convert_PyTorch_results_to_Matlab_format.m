@@ -30,7 +30,7 @@ end
 clear
 
 
-%% autoencoding
+%% single taskonomy net
 clear
 
 
@@ -60,9 +60,8 @@ end
 clear
 
 
-%% all Taskonomy models
+%% all Taskonomy nets
 clear
-
 MODEL_NAMES = {'autoencoding' 'depth_euclidean' 'jigsaw' 'reshading' ...
                'edge_occlusion' 'keypoints2d' 'room_layout' ...  %'colorization' currently not working
                'curvature' 'edge_texture' 'keypoints3d' 'segment_unsup2d' ...
@@ -73,15 +72,15 @@ MODEL_NAMES = {'autoencoding' 'depth_euclidean' 'jigsaw' 'reshading' ...
 DATASET_NAMES = {'places1', 'places2', 'oasis'};
 SCALE_NAMES = {'scale2','scale4','scale8','scale16','scale32'};
 
-SAVE_PATH = './data taskonomy';
-PYTORCH_RESULTS_PATH = '../Taskonomy Integration/results_taskonomy';
+IMPORT_PATH = './data csv/integration blocked';
+EXPORT_PATH = './data mat/integration blocked';
 
 for model = 1:length(MODEL_NAMES)
     for dataset = 1:length(DATASET_NAMES)
         for scale = 1:length(SCALE_NAMES)
-            corr{scale} = single(readmatrix(fullfile(PYTORCH_RESULTS_PATH, MODEL_NAMES{model}, DATASET_NAMES{dataset}, SCALE_NAMES{scale}, 'correlations.csv')));
-            sim{scale} = single(readmatrix(fullfile(PYTORCH_RESULTS_PATH, MODEL_NAMES{model}, DATASET_NAMES{dataset}, SCALE_NAMES{scale}, 'selfsimilarity.csv')));
-            l2{scale} = single(readmatrix(fullfile(PYTORCH_RESULTS_PATH, MODEL_NAMES{model}, DATASET_NAMES{dataset}, SCALE_NAMES{scale}, 'l2norm.csv')));
+            corr{scale} = single(readmatrix(fullfile(IMPORT_PATH, MODEL_NAMES{model}, DATASET_NAMES{dataset}, SCALE_NAMES{scale}, 'correlations.csv')));
+            sim{scale} = single(readmatrix(fullfile(IMPORT_PATH, MODEL_NAMES{model}, DATASET_NAMES{dataset}, SCALE_NAMES{scale}, 'selfsimilarity.csv')));
+            l2{scale} = single(readmatrix(fullfile(IMPORT_PATH, MODEL_NAMES{model}, DATASET_NAMES{dataset}, SCALE_NAMES{scale}, 'l2norm.csv')));
         end
     
         % combine into single struct
@@ -89,8 +88,8 @@ for model = 1:length(MODEL_NAMES)
         cnn.sim = sim;
         cnn.l2 = l2;
     
-        % export csv for one study
-        save(fullfile(SAVE_PATH, MODEL_NAMES{model}, ['cnn_' MODEL_NAMES{model} '_res_' DATASET_NAMES{dataset} '.mat']), "cnn");
+        % export csv for one dataset
+        save(fullfile(EXPORT_PATH, MODEL_NAMES{model}, ['cnn_' MODEL_NAMES{model} '_res_' DATASET_NAMES{dataset} '.mat']), "cnn");
     end
 end
 

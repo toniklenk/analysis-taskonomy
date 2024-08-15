@@ -2,10 +2,6 @@ clear
 clc
 warning off
 
-
-% import correlation, self-similarity and l2norm (computed in PyTorch)
-DATA_PATH = './data taskonomy';
-
 MODEL_NAMES = {'autoencoding' 'depth_euclidean' 'jigsaw' 'reshading' ...
                'edge_occlusion' 'keypoints2d' 'room_layout' ...  %'colorization' currently not working
                'curvature' 'edge_texture' 'keypoints3d' 'segment_unsup2d' ...
@@ -13,28 +9,27 @@ MODEL_NAMES = {'autoencoding' 'depth_euclidean' 'jigsaw' 'reshading' ...
                'class_scene' 'fixated_pose' 'normal' 'segment_semantic' ...
                'denoising' 'inpainting' 'point_matching' 'vanishing_point'};
 
-
-BEHAVIOR_PATH = './behavior';
-BEHAVIOR_NAMES = {'study1_places1_short.mat', 'study2_places1.mat', 'study3_places2.mat', 'study4_oasis.mat'};
-
+RATINGS_PATH = './images and ratings/ratings';
+RATINGS_NAMES = {'study1_places1_short.mat', 'study2_places1.mat', 'study3_places2.mat', 'study4_oasis.mat'};
 DATASET_NAMES = {'places1', 'places1', 'places2', 'oasis'}; % study 1&2 use only different behavioral data
 
-SAVE_PATH = './results taskonomy';
-
-
-
+% import integration(correlation actually, so invert), self-similarity and l2norm (computed in PyTorch)
+% calculate ibcorr from unblocked integration (49 layers)
+%IMPORT_PATH = './data mat/integration ';
+%EXPORT_PATH = './data mat/ibcorr blocked_integr';
+% calculate ibcorr from blocked integration (17 layers)
+IMPORT_PATH = './data mat/integration blocked';
+EXPORT_PATH = './data mat/ibcorr blocked_integr';
 
 %%
-
-
 for model = 1:length(MODEL_NAMES)
-
+    disp(model)
     for study=1:4
         
-        load(fullfile(DATA_PATH, MODEL_NAMES{model}, ['cnn_' MODEL_NAMES{model} '_res_' DATASET_NAMES{study} '.mat']));
+        load(fullfile(IMPORT_PATH, MODEL_NAMES{model}, ['cnn_' MODEL_NAMES{model} '_res_' DATASET_NAMES{study} '.mat']));
 
         % behaviour
-        load(fullfile(BEHAVIOR_PATH, BEHAVIOR_NAMES{study}));
+        load(fullfile(RATINGS_PATH, RATINGS_NAMES{study}));
         beh=mean(res.beauty,2); 
 
         for scale=1:5
@@ -48,7 +43,7 @@ for model = 1:length(MODEL_NAMES)
                 int_=-cnn.corr{scale}(:,img);
                 sim_=cnn.sim{scale}(:,img);
                 l2_=cnn.l2{scale}(:,img);
-    
+        
                 %integration effect
                 [r,p]=corr(beh,int_,'type','Spearman');
                 dat.c{study}{1}{scale}(img,1)=r;
@@ -133,7 +128,7 @@ for model = 1:length(MODEL_NAMES)
         end
     
     end
-    save(fullfile(SAVE_PATH,['cnn_prediction_' MODEL_NAMES{model} '.mat']), "dat")
+    save(fullfile(EXPORT_PATH,['cnn_prediction_' MODEL_NAMES{model} '.mat']), "dat")
 end
 
 

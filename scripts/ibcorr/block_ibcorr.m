@@ -2,9 +2,6 @@ clear
 clc
 warning off
 
-
-DATA_PATH = './results taskonomy';
-
 MODEL_NAMES = {'autoencoding' 'depth_euclidean' 'jigsaw' 'reshading' ...
                'edge_occlusion' 'keypoints2d' 'room_layout' ...  %'colorization' currently not working
                'curvature' 'edge_texture' 'keypoints3d' 'segment_unsup2d' ...
@@ -12,7 +9,8 @@ MODEL_NAMES = {'autoencoding' 'depth_euclidean' 'jigsaw' 'reshading' ...
                'class_scene' 'fixated_pose' 'normal' 'segment_semantic' ...
                'denoising' 'inpainting' 'point_matching' 'vanishing_point'};
 
-SAVE_PATH = './results taskonomy blocked';
+IMPORT_PATH = './data mat/ibcorr';
+EXPORT_PATH = './data mat/ibcorr blocked';
 
 
 
