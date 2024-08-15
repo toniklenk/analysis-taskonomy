@@ -1,4 +1,4 @@
 data csv
 data mat
 images and ratings
-lib/__pycache__
+scripts/lib/__pycache__
