@@ -21,6 +21,29 @@ from .ActivationPattern import Activation_Pattern
 from .taskonomy_network import TaskonomyDecoder, TaskonomyEncoder
 
 
+NETS_SEMANTIC = ["class_object", "class_scene", "segment_semantic"]
+
+# from radek paper missing: colorization (not downloadable from taskonomy)
+NETS_2D = [
+    "autoencoding",
+    "denoising",
+    "edge_texture",
+    "inpainting",
+    "keypoints2d",
+    "segment_unsup2d",
+]
+
+# from radek paper missing: z-depth (missing from importing as well) and distance (but this is not a network after all)
+NETS_3D = [
+    "edge_occlusion",
+    "keypoints3d",
+    "segment_unsup25d",
+    "reshading",
+    "normal",
+    "curvature",
+]
+
+
 def taskonomy_net_layer_shapes(
     net: Union[TaskonomyEncoder, TaskonomyDecoder]
 ) -> OrderedDict:
@@ -110,3 +133,54 @@ def calculate_rdm(data: pd.DataFrame, correlation_type: str = "pearson"):
         rdm.loc[col1, col1] = 0.0
 
     return rdm
+
+
+def compare_corr(r_yx1, r_yx2, X1, X2, correlation="pearson") -> float:
+    """Compares two correlation coefficients that are non-independent because they're based on the same sample
+    and returns a Z-statistic to perform a hypothesis test.
+
+    This method is described in Meng, Rosenthal, Rubin; 1992; Psych. Bulletin
+
+    """
+    if correlation == "pearson":
+        rx = pearsonr(X1, X2)[0]
+    elif correlation == "spearman":
+        rx = spearmanr(X1, X2)[0]
+
+    r2bar = (r_yx1**2 + r_yx2**2) / 2
+    f = (1 - rx) / (2 * (1 - r2bar))
+    h = (1 - f * r2bar) / (1 - r2bar)
+    N = len(X1)
+
+    # fisher z-transform
+    z_yx1, z_yx2 = np.arctanh(r_yx1), np.arctanh(r_yx2)
+
+    Z = (z_yx1 - z_yx2) * np.sqrt((N - 3) / (2 * rx * h))
+
+    return Z
+
+
+def models_best_predicting_integration_from_block(
+    block_num: int,
+    df_model_ibcorr: pd.Series,
+    df_model_integration,
+    block_layer_mapping,
+):
+    """Returns layer num (nums starting with 0) from a block.
+
+    ---
+    block_num: equals the layer num in the blocked layers
+
+    """
+    mask = block_layer_mapping == block_num
+    idx = df_model_ibcorr[mask].idxmax()
+    return df_model_integration[idx]
+
+
+def  modelname2class(model_name):
+    if model_name in NETS_SEMANTIC:
+        return "semantic"
+    elif model_name in NETS_2D:
+        return "2d"
+    elif model_name in NETS_3D:
+        return "3d"
