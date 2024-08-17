@@ -10,8 +10,8 @@ MODEL_NAMES = {'autoencoding' 'depth_euclidean' 'jigsaw' 'reshading' ...
 STUDY_NAMES = {'short presentation','long presentation','complexity order','oasis'};
 SCALE_NAMES = {'scale2','scale4','scale8','scale16','scale32'};
 
-IMPORT_PATH = './data mat/ibcorr blocked_integr'
-EXPORT_PATH = './data csv/ibcorr blocked_integr'
+IMPORT_PATH = './data mat/ibcorr blocked'
+EXPORT_PATH = './data csv/ibcorr blocked'
 
 %%
 load(fullfile(RESULTS_PATH,['cnn_prediction_' MODEL_NAMES{1} '.mat']), "dat")
