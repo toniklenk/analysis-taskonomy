@@ -25,7 +25,7 @@ BEHAVIOUR_NAMES = (
 )
 
 # VisualPrior.viable_feature_tasks
-MODEL_NAMES = (
+MODEL_NAMES = [
     "autoencoding",
     "depth_euclidean",
     "jigsaw",
@@ -49,7 +49,31 @@ MODEL_NAMES = (
     "inpainting",
     "point_matching",
     "vanishing_point",
-)
+]
+
+NETS_SEMANTIC = ["class_object", "class_scene", "segment_semantic"]
+
+# from radek paper missing: colorization (not downloadable from taskonomy)
+NETS_2D = [
+    "autoencoding",
+    "denoising",
+    "edge_texture",
+    "inpainting",
+    "keypoints2d",
+    "segment_unsup2d",
+]
+
+# from radek paper missing: z-depth (missing from importing as well) and distance (but this is not a network after all)
+NETS_3D = [
+    "edge_occlusion",
+    "keypoints3d",
+    "segment_unsup25d",
+    "reshading",
+    "normal",
+    "curvature",
+]
+
+NETS_ALL = NETS_SEMANTIC + NETS_2D + NETS_3D
 
 
 def load_integration(
@@ -76,3 +100,70 @@ def load_integration(
     dfi.columns.name = "layer"
     dfi = dfi.stack("layer").to_frame().rename({0: "integration"}, axis=1)
     return dfi
+
+
+def load_ibcorr(
+    path,
+    models: list = MODEL_NAMES,
+    studies: list = STUDY_NAMES,
+    scales: list = SCALE_NAMES,
+):
+    cl = []
+    for mo, st, sc in product(models, studies, scales):
+        c = (
+            pd.read_csv(
+                os.path.join(path, mo, st, sc, "ib_correlations.csv"),
+                header=None,
+                names=["ibcorr"],
+            )
+            .assign(scale=sc, study=st, model=mo)
+            .reset_index()
+            .rename({"index": "layer"}, axis=1)
+        )
+        cl.append(c)
+
+    dfibc = pd.concat(cl).set_index(["model", "study", "scale", "layer"])
+    return dfibc
+
+
+def load_pvalues(
+    path,
+    models: list = MODEL_NAMES,
+    studies: list = STUDY_NAMES,
+    scales: list = SCALE_NAMES,
+):
+    """Gets same path as ibcorr!"""
+    pl = []
+    for mo, st, sc in product(models, studies, scales):
+        p = (
+            pd.read_csv(
+                os.path.join(path, mo, st, sc, "ib_correlations_pvalues.csv"),
+                header=None,
+                names=["pvalue"],
+            )
+            .assign(scale=sc, study=st, model=mo)
+            .reset_index()
+            .rename({"index": "layer"}, axis=1)
+        )
+        pl.append(p)
+
+    dfp = pd.concat(pl).set_index(["model", "study", "scale", "layer"])
+    return dfp
+
+
+def load_ratings(path, behaviours = BEHAVIOUR_NAMES):
+    beauty_ratings = {}
+    for r in behaviours:
+
+        data = (
+            pd.read_csv(os.path.join(path, r), header=None)
+            .mean(axis=1)
+            .to_frame()
+            .rename({0: "beauty rating"}, axis=1)
+        )
+        data.index.name = "img_id"
+
+        # add name of study to index
+        beauty_ratings[r] = pd.concat([data], names=["dataset"], keys=[r])
+    
+    return beauty_ratings
