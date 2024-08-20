@@ -16,7 +16,7 @@ from statsmodels.api import OLS
 
 DATASET_NAMES = ("places1", "places2", "oasis")
 SCALE_NAMES = ("scale2", "scale4", "scale8", "scale16", "scale32")
-STUDY_NAMES = ("short presentation", "long presentation", "complexity order")
+STUDY_NAMES = ("short presentation", "long presentation", "complexity order","oasis")
 BEHAVIOUR_NAMES = (
     "study1_places1_short.csv",
     "study2_places1.csv",
@@ -167,3 +167,13 @@ def load_ratings(path, behaviours = BEHAVIOUR_NAMES):
         beauty_ratings[r] = pd.concat([data], names=["dataset"], keys=[r])
     
     return beauty_ratings
+
+
+def studyname2datasetname(studyname):
+    if studyname in ("short presentation", "long presentation"):
+        return "places1"
+    elif studyname == "complexity order":
+        return "places2"
+    elif studyname == "oasis":
+        return "oasis"
+    
