@@ -1,6 +1,9 @@
 data csv
 data mat
-results/spatial integration
+#results/spatial integration
+results/spatial integration/scale8
+results/spatial integration/scale4/study2
+results/spatial integration/scale4/remaining_models.pkl
 results/spatial integration/scale4/study1big
 images and ratings
 scripts/lib/__pycache__
