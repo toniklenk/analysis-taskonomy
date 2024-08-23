@@ -89,6 +89,20 @@ def flatten_concat(d: Dict[str, pd.DataFrame]) -> pd.DataFrame:
     return df
 
 
+def flatten_concat_rdms(rdms: Dict[str, pd.DataFrame]) -> pd.DataFrame:
+    """Take a dict of rdms as DataFrames, extract the upper triangle (without diagonal, as appropriate for rms),
+    concat them into columns a single df and use dict keys as colnames, to prepare for use with calculate_rdm
+
+    """
+
+    example_rdm = rdms[list(rdms.keys())[0]]
+    mask = np.triu(np.ones_like(example_rdm.values).astype(np.bool_), k=1)
+    d = {mo: pd.Series(rdm.values[mask]) for mo, rdm in rdms.items()}
+    df = pd.concat(d.values(), axis=1)
+    df.columns = d.keys()
+    return df
+
+
 def calculate_rdm(data: pd.DataFrame, correlation_type: str = "pearson"):
     """Calculate RDM with pearson/spearman correlation for every combination of columns
 
@@ -177,7 +191,7 @@ def models_best_predicting_integration_from_block(
     return df_model_integration[idx]
 
 
-def  modelname2class(model_name):
+def modelname2class(model_name):
     if model_name in NETS_SEMANTIC:
         return "semantic"
     elif model_name in NETS_2D:
