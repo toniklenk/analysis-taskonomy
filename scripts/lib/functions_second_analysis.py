@@ -88,6 +88,9 @@ def flatten_concat(d: Dict[str, pd.DataFrame]) -> pd.DataFrame:
     df.columns = d.keys()
     return df
 
+def rdm2vec(rdm):
+    mask = np.triu(np.ones_like(rdm.values).astype(np.bool_), k=1)
+    return rdm.values[mask]
 
 def flatten_concat_rdms(rdms: Dict[str, pd.DataFrame]) -> pd.DataFrame:
     """Take a dict of rdms as DataFrames, extract the upper triangle (without diagonal, as appropriate for rms),
