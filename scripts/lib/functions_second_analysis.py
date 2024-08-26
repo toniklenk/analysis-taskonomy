@@ -201,3 +201,20 @@ def modelname2class(model_name):
         return "2d"
     elif model_name in NETS_3D:
         return "3d"
+
+
+def rdm2vec(rdm):
+    mask = np.triu(np.ones_like(rdm.values).astype(np.bool_), k=1)
+    return rdm.values[mask]
+
+
+def correlate_rdms(rdm1, rdm2, correlation="pearson"):
+    if correlation == "pearson":
+        return pearsonr(rdm2vec(rdm1), rdm2vec(rdm2))
+
+    if correlation == "spearman":
+        return spearmanr(rdm2vec(rdm1), rdm2vec(rdm2))
+
+    raise ValueError(
+        "corrrelate_rdm muss für correlation pearson oder spearman bekommen"
+    )
