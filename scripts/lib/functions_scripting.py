@@ -3,15 +3,27 @@
 """
 
 # python
-import os, sys, pickle
-from itertools import combinations_with_replacement, combinations, product
-from collections import OrderedDict
+import os
+from itertools import product
 
 # stats
 import numpy as np
 import pandas as pd
-from scipy.stats import pearsonr, spearmanr
-from statsmodels.api import OLS
+
+PATH_IMAGES = "../images and ratings/imageversions_256"
+PATH_RATINGS = "../images and ratings/ratings"
+
+# !! correlations, invert sign for integration
+PATH_INTEGRATION = "../data csv/integration"
+PATH_INTEGRATION_MAXPOOL = "../data csv/integration maxpool"
+PATH_INTEGRATION_AVERAGE = "../data csv/integration average"
+
+PATH_IBCORR = "../data csv/ibcorr"
+PATH_IBCORR_AVERAGE = "../data csv/ibcorr average"
+PATH_IBCORR_MAXPOOL = "../data csv/ibcorr maxpool"
+
+PATH_RESULTS = "../results"
+PATH_PLOTS = "../plots"
 
 
 DATASET_NAMES = ("places1", "places2", "oasis")
