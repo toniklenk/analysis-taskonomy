@@ -2,5 +2,6 @@ data csv
 data mat
 results/spatial integration/scale4/short presentation subsetdata
 results/spatial integration/scale4/complexity order subsetdata
+results/spatial integration/scale4/subsetdata complexity order allnets.h5
 images and ratings
 scripts/lib/__pycache__

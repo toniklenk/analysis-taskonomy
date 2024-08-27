@@ -6,13 +6,17 @@ from typing import Union, Dict
 import os, pickle
 from collections import OrderedDict
 from dataclasses import dataclass
-from itertools import combinations_with_replacement
+from itertools import combinations
 
 # stats
 import torch
 import numpy as np
 import pandas as pd
 from scipy.stats import pearsonr, spearmanr
+import statsmodels.api as sm
+from statsmodels.formula.api import ols
+from statsmodels.api import OLS
+
 
 # classes
 from .ActivationPattern import Activation_Pattern
@@ -88,12 +92,14 @@ def flatten_concat(d: Dict[str, pd.DataFrame]) -> pd.DataFrame:
     df.columns = d.keys()
     return df
 
+
 def rdm2vec(rdm):
     mask = np.triu(np.ones_like(rdm.values).astype(np.bool_), k=1)
     return rdm.values[mask]
 
+
 def flatten_concat_rdms(rdms: Dict[str, pd.DataFrame]) -> pd.DataFrame:
-    """Take a dict of rdms as DataFrames, extract the upper triangle (without diagonal, as appropriate for rms),
+    """Take a dict of rdms as DataFrames, extract the upper triangle (without diagonal, as appropriate for rdms),
     concat them into columns a single df and use dict keys as colnames, to prepare for use with calculate_rdm
 
     """
@@ -106,7 +112,7 @@ def flatten_concat_rdms(rdms: Dict[str, pd.DataFrame]) -> pd.DataFrame:
     return df
 
 
-def calculate_rdm(data: pd.DataFrame, correlation_type: str = "pearson"):
+def calculate_rdm(d: pd.DataFrame, ctype: str = "pearson"):
     """Calculate RDM with pearson/spearman correlation for every combination of columns
 
     Parameters
@@ -124,30 +130,27 @@ def calculate_rdm(data: pd.DataFrame, correlation_type: str = "pearson"):
         representational dissimilarity matrix of inputs' columns
 
     """
-    num_columns = data.shape[1]
+    if ctype not in ("pearson", "spearman", "absdiff"):
+        raise ValueError("Kein gültiger Wert für ctype")
 
-    # create empty matrix to store RDM
-    # index and column labels are in order of input columns
     rdm = pd.DataFrame(
-        np.full((num_columns, num_columns), np.nan),
-        columns=data.columns,
-        index=data.columns,
+        0,
+        columns=d.columns,
+        index=d.columns,
     )
 
-    for col1, col2 in combinations_with_replacement(data.columns, 2):
+    for col1, col2 in combinations(d.columns, 2):
         # there's one NaN in the autoencoding integration values, filter this here, don't know why that happens
-        co11_col2 = data[[col1, col2]].dropna()
+        co11_col2 = d[[col1, col2]].dropna()
 
-        # calculate correlation
-        if correlation_type == "pearson":
-            corr = pearsonr(co11_col2.values[:, 0], co11_col2.values[:, 1])[0]
-        elif correlation_type == "spearman":
-            corr = spearmanr(co11_col2.values[:, 0], co11_col2.values[:, 1])[0]
+        if ctype == "pearson":
+            c = pearsonr(co11_col2.values[:, 0], co11_col2.values[:, 1])[0]
+        elif ctype == "spearman":
+            c = spearmanr(co11_col2.values[:, 0], co11_col2.values[:, 1])[0]
+        elif ctype == "absdiff":
+            c = co11_col2.diff(axis=1).iloc[:, -1].abs().sum()
 
-        # fill upper and lower triangular matrix
-        rdm.loc[col1, col2] = corr
-        rdm.loc[col2, col1] = corr
-        rdm.loc[col1, col1] = 0.0
+        rdm.loc[col1, col2], rdm.loc[col2, col1] = c, c
 
     return rdm
 
@@ -209,6 +212,9 @@ def rdm2vec(rdm):
 
 
 def correlate_rdms(rdm1, rdm2, correlation="pearson"):
+    if type(rdm1) != pd.DataFrame or type(rdm2) != pd.DataFrame:
+        raise TypeError("both RDMs need to be DataFrames")
+
     if correlation == "pearson":
         return pearsonr(rdm2vec(rdm1), rdm2vec(rdm2))
 
@@ -218,3 +224,11 @@ def correlate_rdms(rdm1, rdm2, correlation="pearson"):
     raise ValueError(
         "corrrelate_rdm muss für correlation pearson oder spearman bekommen"
     )
+
+
+# variance partitioning
+def predictors_r2(predictors, target):
+    predictors = sm.add_constant(predictors)
+    model = sm.OLS(target, predictors)
+    results = model.fit()
+    return results.rsquared

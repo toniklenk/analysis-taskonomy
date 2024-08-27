@@ -27,29 +27,30 @@ BEHAVIOUR_NAMES = (
 # VisualPrior.viable_feature_tasks
 MODEL_NAMES = [
     "autoencoding",
-    "depth_euclidean",
-    "jigsaw",
-    "reshading",
-    "edge_occlusion",
-    "keypoints2d",
-    "room_layout",  #'colorization' currently not working
-    "curvature",
-    "edge_texture",
-    "keypoints3d",
-    "segment_unsup2d",
     "class_object",
-    "egomotion",
-    "nonfixated_pose",
-    "segment_unsup25d",
-    "class_scene",
-    "fixated_pose",
-    "normal",
-    "segment_semantic",
+    "class_scene",  #'colorization' currently not working
+    "curvature",
     "denoising",
+    "depth_euclidean",
+    "edge_occlusion",
+    "edge_texture",
+    "egomotion",
+    "fixated_pose",
     "inpainting",
+    "jigsaw",
+    "keypoints2d",
+    "keypoints3d",
+    "nonfixated_pose",
+    "normal",
     "point_matching",
+    "reshading",
+    "room_layout",
+    "segment_semantic",
+    "segment_unsup25d",
+    "segment_unsup2d",
     "vanishing_point",
 ]
+
 
 NETS_SEMANTIC = ["class_object", "class_scene", "segment_semantic"]
 
@@ -65,12 +66,12 @@ NETS_2D = [
 
 # from radek paper missing: z-depth (missing from importing as well) and distance (but this is not a network after all)
 NETS_3D = [
+    "curvature",
     "edge_occlusion",
     "keypoints3d",
-    "segment_unsup25d",
-    "reshading",
     "normal",
-    "curvature",
+    "reshading",
+    "segment_unsup25d",
 ]
 
 NETS_ALL = NETS_SEMANTIC + NETS_2D + NETS_3D
@@ -175,3 +176,8 @@ def studyname2datasetname(studyname):
         return "places2"
     elif studyname == "oasis":
         return "oasis"
+
+
+def set_diagonal_to_zero(rdm):
+    np.fill_diagonal(rdm.values, 0)
+    return rdm
