@@ -189,6 +189,8 @@ def studyname2datasetname(studyname):
     elif studyname == "oasis":
         return "oasis"
 
+def studyname(studyid):
+    return STUDY_NAMES[int(studyid[-1])-1]
 
 def set_diagonal_to_zero(rdm):
     np.fill_diagonal(rdm.values, 0)

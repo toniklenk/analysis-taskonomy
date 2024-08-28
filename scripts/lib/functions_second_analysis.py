@@ -1,6 +1,6 @@
 # type-hinting
 from __future__ import annotations
-from typing import Union, Dict
+from typing import Union, Dict, List
 
 # python
 import os, pickle
@@ -227,8 +227,9 @@ def correlate_rdms(rdm1, rdm2, correlation="pearson"):
 
 
 # variance partitioning
-def predictors_r2(predictors, target):
+def predictors_r2(predictors: List[pd.DataFrame], target):
+    predictors = np.stack([rdm2vec(_rdm).transpose() for _rdm in predictors], axis=1)
     predictors = sm.add_constant(predictors)
-    model = sm.OLS(target, predictors)
+    model = sm.OLS(rdm2vec(target), predictors)
     results = model.fit()
     return results.rsquared
