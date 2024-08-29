@@ -111,6 +111,7 @@ def load_integration(
     # to integration
     dfi = -pd.concat(cl).set_index(["model", "dataset", "scale", "img"])
     dfi.columns.name = "layer"
+    dfi.columns = dfi.columns.astype(np.int16)
     dfi = dfi.stack("layer").to_frame().rename({0: "integration"}, axis=1)
     return dfi
 
@@ -181,6 +182,9 @@ def load_ratings(path, behaviours=BEHAVIOUR_NAMES):
     return beauty_ratings
 
 
+beauty_ratings = load_ratings(PATH_RATINGS)
+
+
 def studyname2datasetname(studyname):
     if studyname in ("short presentation", "long presentation"):
         return "places1"
@@ -189,9 +193,22 @@ def studyname2datasetname(studyname):
     elif studyname == "oasis":
         return "oasis"
 
+
 def studyname(studyid):
-    return STUDY_NAMES[int(studyid[-1])-1]
+    return STUDY_NAMES[int(studyid[-1]) - 1]
+
 
 def set_diagonal_to_zero(rdm):
     np.fill_diagonal(rdm.values, 0)
     return rdm
+
+
+def studyratings(study):
+    if study == "study1" or study == "short presentation":
+        return beauty_ratings["study1_places1_short.csv"]
+    if study == "study2" or study == "long presentation":
+        return beauty_ratings["study2_places1.csv"]
+    if study == "study3" or study == "complexity order":
+        return beauty_ratings["study3_places2.csv"]
+    if study == "study4" or study == "oasis":
+        return beauty_ratings["study4_oasis.csv"]
