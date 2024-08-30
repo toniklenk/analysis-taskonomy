@@ -88,6 +88,20 @@ NETS_3D = [
 
 NETS_ALL = NETS_SEMANTIC + NETS_2D + NETS_3D
 
+_models_ordered = [
+    "vanishing_point",
+    "segment_unsup2d",
+    "normal",
+    "room_layout",
+    "keypoints3d",
+    "nonfixated_pose",
+    "autoencoding",
+    "segment_unsup25d",
+    "class_scene",
+    "reshading",
+    "curvature",
+    "egomotion",
+]
 
 def load_integration(
     path,
@@ -212,3 +226,15 @@ def studyratings(study):
         return beauty_ratings["study3_places2.csv"]
     if study == "study4" or study == "oasis":
         return beauty_ratings["study4_oasis.csv"]
+
+def study2behaviour(st):
+    return BEHAVIOUR_NAMES[STUDY_NAMES.index(st)]
+
+
+def study2dataset(st):
+    if st in STUDY_NAMES[:2]:
+        return DATASET_NAMES[0]
+    if st == STUDY_NAMES[2]:
+        return DATASET_NAMES[1]
+    if st == STUDY_NAMES[3]:
+        return DATASET_NAMES[2]

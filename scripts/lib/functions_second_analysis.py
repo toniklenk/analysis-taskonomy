@@ -17,12 +17,16 @@ import statsmodels.api as sm
 from statsmodels.formula.api import ols
 from statsmodels.api import OLS
 
-
 # classes
 from .ActivationPattern import Activation_Pattern
 
 # neural networks
 from .taskonomy_network import TaskonomyDecoder, TaskonomyEncoder
+from lib.transforms import VisualPriorRepresentation
+from torchvision.models.feature_extraction import (
+    get_graph_node_names,
+    create_feature_extractor,
+)
 
 
 NETS_SEMANTIC = ["class_object", "class_scene", "segment_semantic"]
@@ -75,10 +79,28 @@ def taskonomy_activation_layer_shapes(net_activation: OrderedDict) -> OrderedDic
     )
 
 
+# setup nets for extracting activations from best layer
+def setup_singlelayer(model_name: str, layer_idx: int):
+    """Setup activation extractor for a single layer of a tasnomomy network"""
+    VisualPriorRepresentation._load_unloaded_nets([model_name])
+    net = VisualPriorRepresentation.feature_task_to_net[model_name]
+
+    _, eval_nodes = get_graph_node_names(net)
+    return_nodes = {node: node for node in eval_nodes if "conv" in node or "fc" in node}
+
+    layer_name = list(return_nodes.keys())[layer_idx]
+    return (
+        create_feature_extractor(net, return_nodes={layer_name: layer_name}),
+        layer_name,
+    )
+
+
 def correlate_integration_beauty(integration: np.ndarray, beauty_ratings: pd.Series):
     return np.apply_along_axis(
         lambda c: spearmanr(c, beauty_ratings)[0], 1, integration
     )
+
+
 
 
 def flatten_concat(d: Dict[str, pd.DataFrame]) -> pd.DataFrame:
