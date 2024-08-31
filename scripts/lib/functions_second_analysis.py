@@ -101,8 +101,6 @@ def correlate_integration_beauty(integration: np.ndarray, beauty_ratings: pd.Ser
     )
 
 
-
-
 def flatten_concat(d: Dict[str, pd.DataFrame]) -> pd.DataFrame:
     """Take a dict of DataFrames, flatten them,
     concat them into columns a single df and use dict keys as colnames
