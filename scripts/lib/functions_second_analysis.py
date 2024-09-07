@@ -67,6 +67,15 @@ def taskonomy_net_layer_shapes(
     )
 
 
+def get_layer_size(layerid):
+    actex, lay = setup_singlelayer("autoencoding", layerid) #all nets same encoder
+
+    if layerid == 0:
+        return setup_singlelayer("autoencoding", 0)[0].conv1.weight.numel()
+    id1, id2, id3 = lay.split(".")
+    return actex.get_submodule(id1).get_submodule(id2).get_submodule(id3).weight.numel()
+
+
 def taskonomy_activation_layer_shapes(net_activation: OrderedDict) -> OrderedDict:
     """
     Creates a dictionary with the shapes of
