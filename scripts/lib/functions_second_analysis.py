@@ -132,7 +132,7 @@ def flatten_concat_rdms(rdms: Dict[str, pd.DataFrame]) -> pd.DataFrame:
     return df
 
 
-def calculate_rdm(d: pd.DataFrame, ctype: str = "pearson"):
+def calculate_rdm(d: pd.DataFrame, ctype: str = "pearson", pval=False):
     """Calculate RDM with pearson/spearman correlation for every combination of columns
 
     Parameters
@@ -164,11 +164,17 @@ def calculate_rdm(d: pd.DataFrame, ctype: str = "pearson"):
         co11_col2 = d[[col1, col2]].dropna()
 
         if ctype == "pearson":
-            c = pearsonr(co11_col2.values[:, 0], co11_col2.values[:, 1])[0]
+            c = pearsonr(co11_col2.values[:, 0], co11_col2.values[:, 1])
         elif ctype == "spearman":
-            c = spearmanr(co11_col2.values[:, 0], co11_col2.values[:, 1])[0]
+            c = spearmanr(co11_col2.values[:, 0], co11_col2.values[:, 1])
         elif ctype == "absdiff":
             c = co11_col2.diff(axis=1).iloc[:, -1].abs().sum()
+
+        if ctype in ("pearson", "spearman"):
+            if pval:
+                c = c[1]
+            else:
+                c = c[0]
 
         rdm.loc[col1, col2], rdm.loc[col2, col1] = c, c
 
