@@ -17,6 +17,8 @@ from lib.PatternGenerator import Pattern_Generator
 class NetworkScorer(object):
     """
     Maps back integration beauty score (from node subsets) onto nodes DNN.
+    TODO: make this a simpler class by reducing its functionality to support only one layer,
+    if needed, as class inhering from this containing multiple layers can be built later
     """
 
     def __init__(self, layer_shapes: OrderedDict, subset_iterations_start: int = 0) -> None:

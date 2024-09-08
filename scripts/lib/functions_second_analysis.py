@@ -19,6 +19,10 @@ from statsmodels.api import OLS
 
 # classes
 from .ActivationPattern import Activation_Pattern
+from lib.ImageDataset import ImageDataset
+from lib.PatternGeneratorSearchlight import PatternGeneratorSearchlight
+from lib.functions_scripting import *
+
 
 # neural networks
 from .taskonomy_network import TaskonomyDecoder, TaskonomyEncoder
@@ -67,8 +71,27 @@ def taskonomy_net_layer_shapes(
     )
 
 
+def get_layer_activation_shape(layer_idx):
+    """Get activation shape at specifiec layer
+    of any of the Taskonomy Encoder (they share architecture and have similar activation shapes)
+
+    """
+    activation_extractor, _ = setup_singlelayer("autoencoding", layer_idx)
+    return (
+        list(
+            activation_extractor(
+                next(
+                    iter(ImageDataset(os.path.join(PATH_IMAGES, "places1", "scale2")))
+                )[0]
+            ).values()
+        )[0]
+        .squeeze()
+        .shape
+    )
+
+
 def get_layer_size(layerid):
-    actex, lay = setup_singlelayer("autoencoding", layerid) #all nets same encoder
+    actex, lay = setup_singlelayer("autoencoding", layerid)  # all nets same encoder
 
     if layerid == 0:
         return setup_singlelayer("autoencoding", 0)[0].conv1.weight.numel()
@@ -102,6 +125,42 @@ def setup_singlelayer(model_name: str, layer_idx: int):
         create_feature_extractor(net, return_nodes={layer_name: layer_name}),
         layer_name,
     )
+
+
+def map_singlevoxel_to_3d_(df_subset, layer_idx):
+    """
+    Maps correlation values or p-values or single-image integration,
+    depending on input, of input to 3D space.
+    Each voxel value is only mapped back to its one directly corresponding location
+    (not to every voxels in which's calculation it was included in).
+
+    Parameters
+    ----------
+
+    df_subset : pd.Series
+        Series of corr/p/integration values with len n_subsets
+
+    layer_idx: int
+        Layer id from in which these values were computed, to map to correct shape.
+
+    Returns
+    -------
+    subset3d: np.array
+        3d array with values at their location corresponding location in the convolutional layer.  
+
+    """
+    # boilerplate
+    activation_shape = get_layer_activation_shape(layer_idx)
+    subset3d = np.zeros(activation_shape)
+
+    # map back
+    for idx, val in enumerate(df_subset):
+        subset3d[
+            PatternGeneratorSearchlight._posnum_to_3Dindex(idx, activation_shape)
+        ] = val
+
+    # remove borders, where nothing is mapped to
+    return subset3d[1:-1, 1:-1, 1:-1]
 
 
 def correlate_integration_beauty(integration: np.ndarray, beauty_ratings: pd.Series):
