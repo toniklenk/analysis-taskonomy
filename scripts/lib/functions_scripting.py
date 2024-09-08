@@ -103,6 +103,7 @@ _models_ordered = [
     "egomotion",
 ]
 
+
 def load_integration(
     path,
     models: list = MODEL_NAMES,
@@ -227,14 +228,15 @@ def studyratings(study):
     if study == "study4" or study == "oasis":
         return beauty_ratings["study4_oasis.csv"]
 
+
 def study2behaviour(st):
     return BEHAVIOUR_NAMES[STUDY_NAMES.index(st)]
 
 
 def study2dataset(st):
-    if st in STUDY_NAMES[:2]:
+    if st in (STUDY_NAMES[:2], "study1", "study2"):
         return DATASET_NAMES[0]
-    if st == STUDY_NAMES[2]:
+    if st in (STUDY_NAMES[2], "study3"):
         return DATASET_NAMES[1]
-    if st == STUDY_NAMES[3]:
+    if st in (STUDY_NAMES[3], "study4"):
         return DATASET_NAMES[2]
