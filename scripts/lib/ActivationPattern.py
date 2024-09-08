@@ -10,7 +10,6 @@ import numpy as np
 from scipy.stats import pearsonr
 
 
-
 @dataclass(frozen=True)
 class Activation_Pattern(object):
     """
@@ -20,6 +19,7 @@ class Activation_Pattern(object):
     - Selects subset of nodes (takes pattern from class Pattern_Generator)
     - Calculates integration values for different layers
     """
+
     activation_pattern: OrderedDict
 
     def __getitem__(self, layer_masks: OrderedDict):
@@ -27,20 +27,28 @@ class Activation_Pattern(object):
         Mask whole network with dict specifying tensor mask for each layer (as returned by class: Pattern_Generator)
         """
         return Activation_Pattern(
-            OrderedDict((layer_name,layer_activation[layer_mask])
-                        for (layer_name, layer_activation), layer_mask
-                        in zip(self.activation_pattern.items(), layer_masks.values())))
-    
+            OrderedDict(
+                (layer_name, layer_activation[layer_mask])
+                for (layer_name, layer_activation), layer_mask in zip(
+                    self.activation_pattern.items(), layer_masks.values()
+                )
+            )
+        )
+
     @staticmethod
     def average(first: Activation_Pattern, second: Activation_Pattern):
         """
         Calculate average of two activation patterns
         """
         return Activation_Pattern(
-            OrderedDict((layer_name, (act_first + act_second) / 2.)
-                        for (layer_name, act_first), act_second
-                        in zip(first.activation_pattern.items(), second.activation_pattern.values())))
-    
+            OrderedDict(
+                (layer_name, (act_first + act_second) / 2.0)
+                for (layer_name, act_first), act_second in zip(
+                    first.activation_pattern.items(), second.activation_pattern.values()
+                )
+            )
+        )
+
     @staticmethod
     def calculate_integration_coeff(full: Activation_Pattern, avg: Activation_Pattern):
         """
@@ -49,7 +57,11 @@ class Activation_Pattern(object):
         - Returns a np.ndarray with shape (layers,) and the correlation coefficients
 
         """
-        return np.array([
-            -pearsonr(layer_full.flatten(), layer_avg.flatten())[0]
-            for layer_full, layer_avg
-            in zip(full.activation_pattern.values(), avg.activation_pattern.values())])
+        return np.array(
+            [
+                -pearsonr(layer_full.flatten(), layer_avg.flatten())[0]
+                for layer_full, layer_avg in zip(
+                    full.activation_pattern.values(), avg.activation_pattern.values()
+                )
+            ]
+        )
