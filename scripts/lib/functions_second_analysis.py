@@ -327,3 +327,105 @@ def predictors_r2(predictors: List[pd.DataFrame], target):
     model = sm.OLS(rdm2vec(target), predictors)
     results = model.fit()
     return results.rsquared
+
+
+# cluster analysis
+def find_clusters(spatial_distribution):
+    """
+    Find clusters in give 3D array
+
+    Parameters
+    ----------
+    spatial_distribution: np.array
+        Boolean array of spatial distribution in which to find any clusters.
+
+    """
+    dims = spatial_distribution.shape
+    visited = np.zeros(dims, dtype=bool)
+    clusters = []
+    structure = np.ones((3, 3, 3), dtype=bool)
+
+    for x, y, z in product(range(dims[0]), range(dims[1]), range(dims[2])):
+
+        if spatial_distribution[x, y, z] and not visited[x, y, z]:
+            # update cluster labels
+            labeled_array, num_features = label(
+                spatial_distribution & ~visited, structure=structure
+            )
+            # get label of cluster at this location
+            cluster_idx = labeled_array[x, y, z]
+
+            # cluster indeed exists
+            if cluster_idx > 0:
+                cluster_mask = labeled_array == cluster_idx
+                visited[cluster_mask] = True
+                # cluster is not just single voxel
+                if cluster_mask.sum() > 1:
+                    cluster_array = np.zeros_like(spatial_distribution)
+                    # save map of this cluster
+                    cluster_array[cluster_mask] = True
+                    clusters.append(cluster_array)
+
+    return clusters
+
+
+def permutation_distribtion(
+    df_subset_integration,
+    beauty_ratings,
+    layer_idx,
+    n_permutations=1000,
+    alpha=0.05,
+):
+    """
+    Generate permutation distribution for cluster size of the subset integrations of one network
+
+    Parameters
+    ----------
+
+    df_subset_integration: pd.DataFrame
+        subsets in rows, images in columns
+
+    beauty_ratings: pd.DataFrame
+        image beauty ratings
+
+    layer_idx: int
+
+    n_permutations: int
+        Higher values for a more exact permutation distribution, typically 1000 or 10 000.
+
+    alpha: float
+        Significance level (no MCC of individual voxels in permutation testing)
+
+    Returns
+    -------
+
+    maxclustersized: np.array
+        Permutation distribution: n_permutations-sized array of the maximum cluster size of each permutation
+    """
+    maxclustersizes = []
+
+    for i in range(n_permutations):
+        # randomized ibcorr
+        df_subset_ibcorr = df_subset_integration.apply(
+            lambda r: pd.Series(spearmanr(r, beauty_ratings.sample(frac=1))),
+            axis=1,
+        ).rename({0: "correlation", 1: "pvalue"}, axis=1)
+
+        subset_pvalues_3d = map_singlevoxel_to_3d_(df_subset_ibcorr.pvalue, layer_idx)
+
+        # significant voxels
+        subset_significance_3d = subset_pvalues_3d < alpha
+
+        # clusters
+        cluster_list = find_clusters(subset_significance_3d)
+
+        # largest cluster
+        cluster_sizes = [np.sum(cluster) for cluster in cluster_list]
+
+        # save
+        if len(cluster_sizes) > 0:
+            maxclustersizes.append(max(cluster_sizes))
+        else:
+            maxclustersizes.append(0)  # no cluster
+
+    return np.array(maxclustersizes)
