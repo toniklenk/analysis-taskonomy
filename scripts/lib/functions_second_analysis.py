@@ -8,6 +8,7 @@ from collections import OrderedDict
 from dataclasses import dataclass
 from itertools import combinations
 
+
 # stats
 import torch
 import numpy as np
@@ -16,6 +17,8 @@ from scipy.stats import pearsonr, spearmanr
 import statsmodels.api as sm
 from statsmodels.formula.api import ols
 from statsmodels.api import OLS
+from scipy.ndimage import label
+
 
 # classes
 from .ActivationPattern import Activation_Pattern
@@ -373,11 +376,13 @@ def permutation_distribtion(
     df_subset_integration,
     beauty_ratings,
     layer_idx,
+    masking,
     n_permutations=1000,
     alpha=0.05,
 ):
     """
-    Generate permutation distribution for cluster size of the subset integrations of one network
+    Generate permutation distribution for cluster size.
+    Either for clusters of any significant voxels
 
     Parameters
     ----------
@@ -411,13 +416,22 @@ def permutation_distribtion(
             axis=1,
         ).rename({0: "correlation", 1: "pvalue"}, axis=1)
 
-        subset_pvalues_3d = map_singlevoxel_to_3d_(df_subset_ibcorr.pvalue, layer_idx)
 
-        # significant voxels
-        subset_significance_3d = subset_pvalues_3d < alpha
+        # mask voxels (transfor float array to bool array,
+        # with different criteria which voxels are selected)
 
+        # version1: any voxels with significant correlation
+        if masking == "significant":
+            values_3d = map_singlevoxel_to_3d_(df_subset_ibcorr.pvalue, layer_idx)
+            masked_voxels_3d = values_3d < alpha
+
+        # version2: top 10% of correlation
+        if masking == "topcorrelation":
+            values_3d = map_singlevoxel_to_3d_(df_subset_ibcorr.correlation, layer_idx)
+            masked_voxels_3d = values_3d > np.quantile(df_subset_ibcorr.correlation, 90)
+        
         # clusters
-        cluster_list = find_clusters(subset_significance_3d)
+        cluster_list = find_clusters(masked_voxels_3d)
 
         # largest cluster
         cluster_sizes = [np.sum(cluster) for cluster in cluster_list]
