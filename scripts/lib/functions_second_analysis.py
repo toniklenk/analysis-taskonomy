@@ -149,7 +149,7 @@ def map_singlevoxel_to_3d_(df_subset, layer_idx):
     Returns
     -------
     subset3d: np.array
-        3d array with values at their location corresponding location in the convolutional layer.  
+        3d array with values at their location corresponding location in the convolutional layer.
 
     """
     # boilerplate
@@ -372,13 +372,12 @@ def find_clusters(spatial_distribution):
     return clusters
 
 
-def permutation_distribtion(
+def permutation_distribtion_top10(
     df_subset_integration,
     beauty_ratings,
     layer_idx,
-    masking,
     n_permutations=1000,
-    alpha=0.05,
+    quant=0.9,
 ):
     """
     Generate permutation distribution for cluster size.
@@ -416,22 +415,16 @@ def permutation_distribtion(
             axis=1,
         ).rename({0: "correlation", 1: "pvalue"}, axis=1)
 
+        # mask voxels above 90th correlation quantile
+        subset_ibcorr_3d = map_singlevoxel_to_3d_(
+            df_subset_ibcorr.correlation, layer_idx
+        )
+        subset_top90ibcorr_3d = subset_ibcorr_3d > np.quantile(
+            subset_ibcorr_3d.correlation, quant
+        )
 
-        # mask voxels (transfor float array to bool array,
-        # with different criteria which voxels are selected)
-
-        # version1: any voxels with significant correlation
-        if masking == "significant":
-            values_3d = map_singlevoxel_to_3d_(df_subset_ibcorr.pvalue, layer_idx)
-            masked_voxels_3d = values_3d < alpha
-
-        # version2: top 10% of correlation
-        if masking == "topcorrelation":
-            values_3d = map_singlevoxel_to_3d_(df_subset_ibcorr.correlation, layer_idx)
-            masked_voxels_3d = values_3d > np.quantile(df_subset_ibcorr.correlation, 90)
-        
         # clusters
-        cluster_list = find_clusters(masked_voxels_3d)
+        cluster_list = find_clusters(subset_top90ibcorr_3d)
 
         # largest cluster
         cluster_sizes = [np.sum(cluster) for cluster in cluster_list]
