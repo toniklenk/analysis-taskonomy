@@ -5,48 +5,74 @@ import warnings
 
 
 task_mapping = {
- 'autoencoder': 'autoencoding',
- 'colorization': 'colorization',
- 'curvature': 'curvature',
- 'denoise': 'denoising',
- 'edge2d':'edge_texture',
- 'edge3d': 'edge_occlusion',
- 'ego_motion': 'egomotion', 
- 'fix_pose': 'fixated_pose', 
- 'jigsaw': 'jigsaw',
- 'keypoint2d': 'keypoints2d',
- 'keypoint3d': 'keypoints3d',
- 'non_fixated_pose': 'nonfixated_pose',
- 'point_match': 'point_matching', 
- 'reshade': 'reshading',
- 'rgb2depth': 'depth_zbuffer',
- 'rgb2mist': 'depth_euclidean',
- 'rgb2sfnorm': 'normal',
- 'room_layout': 'room_layout',
- 'segment25d': 'segment_unsup25d',
- 'segment2d': 'segment_unsup2d',
- 'segmentsemantic': 'segment_semantic',
- 'class_1000': 'class_object',
- 'class_places': 'class_scene',
- 'inpainting_whole': 'inpainting',
- 'vanishing_point': 'vanishing_point'
+    "autoencoder": "autoencoding",
+    "colorization": "colorization",
+    "curvature": "curvature",
+    "denoise": "denoising",
+    "edge2d": "edge_texture",
+    "edge3d": "edge_occlusion",
+    "ego_motion": "egomotion",
+    "fix_pose": "fixated_pose",
+    "jigsaw": "jigsaw",
+    "keypoint2d": "keypoints2d",
+    "keypoint3d": "keypoints3d",
+    "non_fixated_pose": "nonfixated_pose",
+    "point_match": "point_matching",
+    "reshade": "reshading",
+    "rgb2depth": "depth_zbuffer",
+    "rgb2mist": "depth_euclidean",
+    "rgb2sfnorm": "normal",
+    "room_layout": "room_layout",
+    "segment25d": "segment_unsup25d",
+    "segment2d": "segment_unsup2d",
+    "segmentsemantic": "segment_semantic",
+    "class_1000": "class_object",
+    "class_places": "class_scene",
+    "inpainting_whole": "inpainting",
+    "vanishing_point": "vanishing_point",
 }
 
 
 CHANNELS_TO_TASKS = {
-    1: ['colorization', 'edge_texture', 'edge_occlusion',  'keypoints3d', 'keypoints2d', 'reshading', 'depth_zbuffer', 'depth_euclidean', ],
-    2: ['curvature', 'principal_curvature'],
-    3: ['autoencoding', 'denoising', 'normal', 'inpainting', 'rgb', 'normals'],
-    128: ['segment_unsup2d', 'segment_unsup25d'],
-    1000: ['class_object'],
-    None: ['segment_semantic']
+    1: [
+        "colorization",
+        "edge_texture",
+        "edge_occlusion",
+        "keypoints3d",
+        "keypoints2d",
+        "reshading",
+        "depth_zbuffer",
+        "depth_euclidean",
+    ],
+    2: ["curvature", "principal_curvature"],
+    3: ["autoencoding", "denoising", "normal", "inpainting", "rgb", "normals"],
+    128: ["segment_unsup2d", "segment_unsup25d"],
+    1000: ["class_object"],
+    None: ["segment_semantic"],
 }
 
 
-PIX_TO_PIX_TASKS = ['colorization', 'edge_texture', 'edge_occlusion',  'keypoints3d', 'keypoints2d', 'reshading', 'depth_zbuffer', 'depth_euclidean', 'curvature', 'autoencoding', 'denoising', 'normal', 'inpainting', 'segment_unsup2d', 'segment_unsup25d', 'segment_semantic', ]
-FEED_FORWARD_TASKS = ['class_object', 'class_scene', 'room_layout', 'vanishing_point']
+PIX_TO_PIX_TASKS = [
+    "colorization",
+    "edge_texture",
+    "edge_occlusion",
+    "keypoints3d",
+    "keypoints2d",
+    "reshading",
+    "depth_zbuffer",
+    "depth_euclidean",
+    "curvature",
+    "autoencoding",
+    "denoising",
+    "normal",
+    "inpainting",
+    "segment_unsup2d",
+    "segment_unsup25d",
+    "segment_semantic",
+]
+FEED_FORWARD_TASKS = ["class_object", "class_scene", "room_layout", "vanishing_point"]
 SINGLE_IMAGE_TASKS = PIX_TO_PIX_TASKS + FEED_FORWARD_TASKS
-SIAMESE_TASKS = ['fix_pose', 'jigsaw', 'ego_motion', 'point_match', 'non_fixated_pose']
+SIAMESE_TASKS = ["fix_pose", "jigsaw", "ego_motion", "point_match", "non_fixated_pose"]
 
 
 TASKS_TO_CHANNELS = {}
@@ -58,7 +84,7 @@ LIST_OF_OLD_TASKS = sorted(list(task_mapping.keys()))
 LIST_OF_TASKS = sorted(list(task_mapping.values()))
 
 
-TASKONOMY_PRETRAINED_WEIGHT_FILES="""autoencoding_decoder-a4a006b5a8b314b9b0ae815c12cf80e4c5f2e6c703abdf65a64a020d3fef7941.pth
+TASKONOMY_PRETRAINED_WEIGHT_FILES = """autoencoding_decoder-a4a006b5a8b314b9b0ae815c12cf80e4c5f2e6c703abdf65a64a020d3fef7941.pth
 autoencoding_encoder-e35146c09253720e97c0a7f8ee4e896ac931f5faa1449df003d81e6089ac6307.pth
 class_object_decoder-3cdb6d9ec5a221ca39352e62412c2ab5ae7a00258a962b9b67fe398566ce6c5d.pth
 class_object_encoder-4a4e42dad58066039a0d2f9d128bb32e93a7e4aa52edb2d2a07bcdd1a6536c18.pth
@@ -100,22 +126,29 @@ segment_unsup25d_encoder-7d12d2500c18c003ffc23943214f5dfd74932f0e3d03dde2c3a81eb
 segment_unsup2d_decoder-a0f3975a22032f116d36e3f3a49f33ddcd6e798cced3ac0962eef5bdccfc397f.pth
 segment_unsup2d_encoder-b679053a920e8bcabf0cd454606098ae85341e054080f2be29473971d4265964.pth
 vanishing_point_encoder-afd2ae9b71d46a54efc5231b3e38ebc3e35bfab78cb0a78d9b75863a240b19a8.pth""".split()
-TASKONOMY_PRETRAINED_WEIGHT_URL_TEMPLATE = 'https://github.com/alexsax/visual-prior/raw/networks/assets/pytorch/{filename}'
-TASKONOMY_PRETRAINED_URLS = {k.split("-")[0]: TASKONOMY_PRETRAINED_WEIGHT_URL_TEMPLATE.format(filename=k)
-                             for k in TASKONOMY_PRETRAINED_WEIGHT_FILES}
+TASKONOMY_PRETRAINED_WEIGHT_URL_TEMPLATE = (
+    "https://github.com/alexsax/visual-prior/raw/networks/assets/pytorch/{filename}"
+)
+TASKONOMY_PRETRAINED_URLS = {
+    k.split("-")[0]: TASKONOMY_PRETRAINED_WEIGHT_URL_TEMPLATE.format(filename=k)
+    for k in TASKONOMY_PRETRAINED_WEIGHT_FILES
+}
+
 
 class TaskonomyNetwork(nn.Module):
-    
-    def __init__(self,
-                 out_channels=3,
-                 eval_only=True,
-                 load_encoder_path=None,
-                 load_decoder_path=None,
-                 model_dir=None,
-                 progress=True):
-        ''' 
-            out_channels = None for decoder only
-        '''
+
+    def __init__(
+        self,
+        out_channels=3,
+        eval_only=True,
+        load_encoder_path=None,
+        load_decoder_path=None,
+        model_dir=None,
+        progress=True,
+    ):
+        """
+        out_channels = None for decoder only
+        """
         super(TaskonomyNetwork, self).__init__()
         self.encoder = TaskonomyEncoder(eval_only=True)
         self.encoder.normalize_outputs = False
@@ -123,25 +156,28 @@ class TaskonomyNetwork(nn.Module):
         self.decoder = None
         if out_channels is not None:
             self.decoder = TaskonomyDecoder(out_channels=out_channels, eval_only=True)
-        
+
         if load_encoder_path is not None:
             self.load_encoder(load_encoder_path, model_dir, progress)
-        
+
         if load_decoder_path is not None:
             self.load_decoder(load_decoder_path, model_dir, progress)
 
-
     def load_encoder(self, url, model_dir=None, progress=True):
-        checkpoint = torch.utils.model_zoo.load_url(url, model_dir=model_dir, progress=progress)
-        return self.encoder.load_state_dict(checkpoint['state_dict'])
+        checkpoint = torch.utils.model_zoo.load_url(
+            url, model_dir=model_dir, progress=progress
+        )
+        return self.encoder.load_state_dict(checkpoint["state_dict"])
 
     def load_decoder(self, url, model_dir=None, progress=True):
-        checkpoint = torch.utils.model_zoo.load_url(url, model_dir=model_dir, progress=progress)
-        return self.decoder.load_state_dict(checkpoint['state_dict'])
+        checkpoint = torch.utils.model_zoo.load_url(
+            url, model_dir=model_dir, progress=progress
+        )
+        return self.decoder.load_state_dict(checkpoint["state_dict"])
 
     def forward(self, x):
         return self.decoder(self.encoder(x))
-        
+
 
 class Scissor(torch.nn.Module):
     # Remove the first row and column of our data
@@ -149,8 +185,9 @@ class Scissor(torch.nn.Module):
     # if used correctly, this removes 0's
     def forward(self, x):
         _, _, h, _ = x.shape
-        x = x[:,:,1:h,1:h]
+        x = x[:, :, 1:h, 1:h]
         return x
+
 
 class TaskonomyDecoder(nn.Module):
     """
@@ -187,7 +224,7 @@ class TaskonomyDecoder(nn.Module):
         self.deconv14 = self._make_layer(32, 16, stride=2, deconv=True)
         self.decoder_output = nn.Sequential(
             nn.Conv2d(16, out_channels, kernel_size=3, stride=1, bias=True, padding=1),
-            nn.Tanh()
+            nn.Tanh(),
         )
 
         self.eval_only = eval_only
@@ -199,11 +236,26 @@ class TaskonomyDecoder(nn.Module):
 
     def _make_layer(self, in_channels, out_channels, stride=1, deconv=False):
         if deconv:
-            pad = nn.ZeroPad2d((1,0,1,0))  # Pad first row and column
-            conv = nn.ConvTranspose2d(in_channels, out_channels, kernel_size=3, stride=stride, padding=1, output_padding=0, bias=False)
+            pad = nn.ZeroPad2d((1, 0, 1, 0))  # Pad first row and column
+            conv = nn.ConvTranspose2d(
+                in_channels,
+                out_channels,
+                kernel_size=3,
+                stride=stride,
+                padding=1,
+                output_padding=0,
+                bias=False,
+            )
             scissor = Scissor()  # Remove first row and column
         else:
-            conv = nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=stride, padding=1, bias=False)  # pad = 'SAME'
+            conv = nn.Conv2d(
+                in_channels,
+                out_channels,
+                kernel_size=3,
+                stride=stride,
+                padding=1,
+                bias=False,
+            )  # pad = 'SAME'
 
         bn = nn.BatchNorm2d(out_channels, momentum=0.1, affine=True)
         lrelu = nn.LeakyReLU(negative_slope=0.2, inplace=False)
@@ -245,7 +297,9 @@ class Bottleneck(nn.Module):
         super(Bottleneck, self).__init__()
         self.conv1 = nn.Conv2d(inplanes, planes, kernel_size=1, bias=False)
         self.bn1 = nn.BatchNorm2d(planes)
-        self.conv2 = nn.Conv2d(planes, planes, kernel_size=3, stride=stride, bias=False, padding=1)
+        self.conv2 = nn.Conv2d(
+            planes, planes, kernel_size=3, stride=stride, bias=False, padding=1
+        )
         # self.conv2 = nn.Conv2d(planes, planes, kernel_size=3, stride=stride, bias=False)
         self.bn2 = nn.BatchNorm2d(planes)
         self.conv3 = nn.Conv2d(planes, planes * 4, kernel_size=1, bias=False)
@@ -280,7 +334,13 @@ class Bottleneck(nn.Module):
 
 class TaskonomyEncoder(nn.Module):
 
-    def __init__(self, normalize_outputs=True, eval_only=True, train_penultimate=False, train=False):
+    def __init__(
+        self,
+        normalize_outputs=True,
+        eval_only=True,
+        train_penultimate=False,
+        train=False,
+    ):
         self.inplanes = 64
         super(TaskonomyEncoder, self).__init__()
         self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=0, bias=False)
@@ -288,12 +348,14 @@ class TaskonomyEncoder(nn.Module):
         self.relu = nn.ReLU(inplace=True)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=0, ceil_mode=True)
         block = Bottleneck
-        layers = [3,4,6,3]
+        layers = [3, 4, 6, 3]
         self.layer1 = self._make_layer(block, 64, layers[0], stride=2)
         self.layer2 = self._make_layer(block, 128, layers[1], stride=2)
         self.layer3 = self._make_layer(block, 256, layers[2])
         self.layer4 = self._make_layer(block, 512, layers[3])
-        self.compress1 = nn.Conv2d(2048, 8, kernel_size=3, stride=1, padding=1, bias=False)
+        self.compress1 = nn.Conv2d(
+            2048, 8, kernel_size=3, stride=1, padding=1, bias=False
+        )
         self.compress_bn = nn.BatchNorm2d(8)
         self.relu1 = nn.ReLU(inplace=True)
         self.groupnorm = nn.GroupNorm(8, 8, affine=False)
@@ -306,7 +368,9 @@ class TaskonomyEncoder(nn.Module):
 
         if train_penultimate:
             for name, param in self.named_parameters():
-                if 'compress' in name:  # last layers: compress1.weight, compress_bn.weight, compress_bn.bias
+                if (
+                    "compress" in name
+                ):  # last layers: compress1.weight, compress_bn.weight, compress_bn.bias
                     param.requires_grad = True
                 else:
                     param.requires_grad = False
@@ -315,15 +379,19 @@ class TaskonomyEncoder(nn.Module):
             for p in self.parameters():
                 p.requires_grad = True
 
-
     def _make_layer(self, block, planes, blocks, stride=1):
         downsample = None
         layers = []
 
         if self.inplanes != planes * block.expansion:
             downsample = nn.Sequential(
-                nn.Conv2d(self.inplanes, planes * block.expansion,
-                        kernel_size=1, stride=1, bias=False),
+                nn.Conv2d(
+                    self.inplanes,
+                    planes * block.expansion,
+                    kernel_size=1,
+                    stride=1,
+                    bias=False,
+                ),
                 nn.BatchNorm2d(planes * block.expansion),
             )
         layers.append(block(self.inplanes, planes, downsample=downsample))
@@ -335,14 +403,14 @@ class TaskonomyEncoder(nn.Module):
         downsample = None
         if stride != 1:
             downsample = nn.Sequential(
-                nn.MaxPool2d( kernel_size=1, stride=stride ),
+                nn.MaxPool2d(kernel_size=1, stride=stride),
             )
         layers.append(block(self.inplanes, planes, stride, downsample))
 
         return nn.Sequential(*layers)
 
     def forward(self, x):
-        x = F.pad(x, pad=(3,3,3,3), mode='constant', value=0)
+        x = F.pad(x, pad=(3, 3, 3, 3), mode="constant", value=0)
         #  other modes are reflect, replicate, constant
 
         x = self.conv1(x)
@@ -365,7 +433,9 @@ class TaskonomyEncoder(nn.Module):
 
     def train(self, val=False):
         if val and self.eval_only:
-            warnings.warn("Ignoring 'train()' in TaskonomyEncoder since 'eval_only' was set during initialization.", RuntimeWarning)
+            warnings.warn(
+                "Ignoring 'train()' in TaskonomyEncoder since 'eval_only' was set during initialization.",
+                RuntimeWarning,
+            )
         else:
             return super(TaskonomyEncoder, self).train(val)
-
